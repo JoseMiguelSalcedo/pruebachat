@@ -15,9 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * Orquestador multiagente (patrón SUPERVISOR / orchestrator-workers).
- */
 @Service
 public class PlaneadorOrquestador {
 
@@ -35,12 +32,14 @@ public class PlaneadorOrquestador {
             @Qualifier("sintetizador") ChatClient sintetizador,
             @Qualifier("agenteClima") ChatClient agenteClima,
             @Qualifier("agentePresupuesto") ChatClient agentePresupuesto,
-            @Qualifier("agenteReservas") ChatClient agenteReservas) {
+            @Qualifier("agenteReservas") ChatClient agenteReservas,
+            @Qualifier("agenteActividades") ChatClient agenteActividades) {
         this.supervisor = supervisor;
         this.sintetizador = sintetizador;
         especialistas.put(Agente.CLIMA, agenteClima);
         especialistas.put(Agente.PRESUPUESTO, agentePresupuesto);
         especialistas.put(Agente.RESERVAS, agenteReservas);
+        especialistas.put(Agente.ACTIVIDADES, agenteActividades);
     }
 
     public String planear(String pregunta) {
@@ -50,16 +49,19 @@ public class PlaneadorOrquestador {
         while (consultados.size() < MAX_PASOS) {
             Agente siguiente = decidir(pregunta, resultados, consultados);
             if (siguiente == null || siguiente == Agente.FIN || consultados.contains(siguiente)) {
-                break; // evita ciclos infinitos
+                break;
             }
-
-            String respuesta = especialistas.get(siguiente).prompt()
-                    .user(contexto(pregunta, resultados))
-                    .call()
-                    .content();
-
-            log.info("[{}] {}", siguiente, respuesta);
-            resultados.add("[" + siguiente + "] " + respuesta);
+            try {
+                String respuesta = especialistas.get(siguiente).prompt()
+                        .user(contexto(pregunta, resultados))
+                        .call()
+                        .content();
+                log.info("[{}] {}", siguiente, respuesta);
+                resultados.add("[" + siguiente + "] " + respuesta);
+            } catch (RuntimeException e) {
+                log.warn("[{}] error al ejecutar especialista: {}", siguiente, e.getMessage());
+                resultados.add("[" + siguiente + "] No fue posible obtener el resultado en este intento.");
+            }
             consultados.add(siguiente);
         }
 
@@ -69,7 +71,6 @@ public class PlaneadorOrquestador {
                 .content();
     }
 
-    /** Nodo "supervisor": pide al modelo una Decision (salida estructurada). */
     private Agente decidir(String pregunta, List<String> resultados, Set<Agente> consultados) {
         String yaConsultados = consultados.isEmpty()
                 ? "ninguno"

@@ -20,8 +20,13 @@ public class AgentesDebugController {
     public AgentesDebugController(
             @Qualifier("agenteClima") ChatClient clima,
             @Qualifier("agentePresupuesto") ChatClient presupuesto,
-            @Qualifier("agenteReservas") ChatClient reservas) {
-        this.agentes = Map.of("clima", clima, "presupuesto", presupuesto, "reservas", reservas);
+            @Qualifier("agenteReservas") ChatClient reservas,
+            @Qualifier("agenteActividades") ChatClient actividades) {
+        this.agentes = Map.of(
+                "clima", clima,
+                "presupuesto", presupuesto,
+                "reservas", reservas,
+                "actividades", actividades);
     }
 
     @GetMapping("/{agente}")
@@ -29,7 +34,7 @@ public class AgentesDebugController {
         ChatClient chatClient = agentes.get(agente);
         if (chatClient == null) {
             return ResponseEntity.badRequest()
-                    .body("Agente desconocido: " + agente + ". Usa clima, presupuesto o reservas.");
+                    .body("Agente desconocido: " + agente + ". Usa clima, presupuesto, reservas o actividades.");
         }
         return ResponseEntity.ok(chatClient.prompt().user(q).call().content());
     }

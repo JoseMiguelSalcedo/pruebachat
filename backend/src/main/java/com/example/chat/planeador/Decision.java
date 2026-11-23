@@ -8,5 +8,5 @@ package com.example.chat.planeador;
 public record Decision(Agente siguiente, String motivo) {
 
     /** Agentes a los que el supervisor puede delegar, o FIN para responder. */
-    public enum Agente { CLIMA, PRESUPUESTO, RESERVAS, FIN }
+    public enum Agente { CLIMA, PRESUPUESTO, RESERVAS, ACTIVIDADES, FIN }
 }

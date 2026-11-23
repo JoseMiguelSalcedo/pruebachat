@@ -3,6 +3,7 @@ backend/build/
 *.class
 *.jar
 *.war
+*.log
 .idea/
 *.iml
 .vscode/

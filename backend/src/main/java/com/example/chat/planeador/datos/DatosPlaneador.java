@@ -10,16 +10,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-/**
- * Datos simulados (ficticios) del planeador.
- * En un sistema real vendrian de una API de clima, una base de datos de precios
- * y un sistema de reservas. Aqui son mapas en memoria para que el taller funcione
- * sin internet y los resultados se puedan verificar a mano.
- */
 @Component
 public class DatosPlaneador {
 
-    /** Costos por persona en pesos colombianos (valores ficticios). */
     public record Destino(String nombre, int transporte, int entrada, int alimentacion) {
         public int costoPorPersona() {
             return transporte + entrada + alimentacion;
@@ -34,6 +27,7 @@ public class DatosPlaneador {
     private final Map<String, String> alias = new LinkedHashMap<>();
     private final Map<String, Pronostico> pronostico = new LinkedHashMap<>();
     private final Map<String, Integer> cupos = new ConcurrentHashMap<>();
+    private final Map<String, String> actividades = new LinkedHashMap<>();
     private final List<Reserva> reservas = new ArrayList<>();
 
     public DatosPlaneador() {
@@ -71,16 +65,20 @@ public class DatosPlaneador {
         cupos.put("suesca domingo", 6);
         cupos.put("chicaque sabado", 0);
         cupos.put("chicaque domingo", 15);
+
+        actividades.put("guatavita", "caminata guiada al mirador de la laguna, visita al pueblo colonial y recorrido cultural muisca");
+        actividades.put("zipaquira", "recorrido subterráneo por la Catedral de Sal, museo de la salmuera y caminata por la plaza central");
+        actividades.put("villa de leyva", "recorrido por la Plaza Mayor, visita a Pozos Azules, Casa Terracota y museo paleontológico");
+        actividades.put("suesca", "escalada en roca, senderismo por los farallones, ciclomontañismo y camping");
+        actividades.put("chicaque", "senderismo por bosque de niebla, avistamiento de aves, arborismo y mirador El Pico del Águila");
     }
 
-    /** Minúsculas, sin tildes y sin espacios sobrantes: "Zipaquirá " -> "zipaquira". */
     public static String normalizar(String texto) {
         if (texto == null) return "";
         String sinTildes = Normalizer.normalize(texto, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
         return sinTildes.toLowerCase().trim().replaceAll("\\s+", " ");
     }
 
-    /** Devuelve la clave del destino (p. ej. "villa de leyva") o null si no existe. */
     public String buscarDestino(String texto) {
         String t = normalizar(texto);
         if (t.isEmpty()) return null;
@@ -93,7 +91,6 @@ public class DatosPlaneador {
         return null;
     }
 
-    /** Acepta "sábado", "Sabado", "sab"... y devuelve "sabado" o "domingo" (o null). */
     public static String normalizarDia(String texto) {
         String t = normalizar(texto);
         if (t.startsWith("sab")) return "sabado";
@@ -101,7 +98,6 @@ public class DatosPlaneador {
         return null;
     }
 
-    /** Formatea 90000 como "$90.000". */
     public static String pesos(int valor) {
         return "$" + String.format(Locale.ROOT, "%,d", valor).replace(',', '.');
     }
@@ -122,7 +118,10 @@ public class DatosPlaneador {
         return cupos.getOrDefault(clave + " " + dia, 0);
     }
 
-    /** Descuenta cupos y registra la reserva. synchronized: varias peticiones a la vez no se pisan. */
+    public String actividades(String clave) {
+        return actividades.get(clave);
+    }
+
     public synchronized Reserva reservar(String clave, String dia, int personas, String responsable) {
         cupos.merge(clave + " " + dia, -personas, Integer::sum);
         Reserva r = new Reserva("RES-%03d".formatted(reservas.size() + 1), clave, dia, personas, responsable);

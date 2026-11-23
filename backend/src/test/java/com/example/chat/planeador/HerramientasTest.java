@@ -1,6 +1,7 @@
 package com.example.chat.planeador;
 
 import com.example.chat.planeador.datos.DatosPlaneador;
+import com.example.chat.planeador.herramientas.ActividadesTools;
 import com.example.chat.planeador.herramientas.ClimaTools;
 import com.example.chat.planeador.herramientas.PresupuestoTools;
 import com.example.chat.planeador.herramientas.ReservasTools;
@@ -40,5 +41,11 @@ class HerramientasTest {
     void destinoDesconocidoListaLosValidos() {
         String r = new ClimaTools(datos).consultarPronostico("Medellín", "sabado");
         assertTrue(r.contains("Destinos válidos"), r);
+    }
+
+    @Test
+    void recomiendaActividadesEnSuesca() {
+        String r = new ActividadesTools(datos).recomendarActividades("Suesca");
+        assertTrue(r.contains("escalada"), r);
     }
 }
