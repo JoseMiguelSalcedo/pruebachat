@@ -1,4 +1,4 @@
-services:
+﻿services:
   ollama:
     image: ollama/ollama:latest
     container_name: pruebachat_ollama
@@ -15,7 +15,7 @@ services:
       - ollama
     environment:
       - OLLAMA_HOST=http://ollama:11434
-    command: ["pull", "llama3"]
+    command: ["pull", "qwen2.5:3b"]
     restart: on-failure
 
   backend:

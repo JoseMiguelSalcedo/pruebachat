@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
@@ -41,7 +41,7 @@
     <button id="sendBtn" type="submit">Enviar</button>
   </form>
   <script>
-    const TIMEOUT_MS = 60000;
+    const TIMEOUT_MS = 300000;
     const API_URL = '/api/v1/chat';
     const STATUS_URL = '/api/v1/status';
     let sessionId = crypto.randomUUID ? crypto.randomUUID() : 'sess-' + Date.now();
