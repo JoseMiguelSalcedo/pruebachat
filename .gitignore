@@ -1,0 +1,10 @@
+backend/.gradle/
+backend/build/
+*.class
+*.jar
+*.war
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
