@@ -61,7 +61,7 @@ public class ChatController {
     }
 
     @GetMapping("/status")
-    public ResponseEntity> status() {
+    public ResponseEntity<?> status() {
         boolean active = false;
         try {
             restClient.get()
